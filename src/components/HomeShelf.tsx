@@ -20,6 +20,7 @@ import type {
 import { useSpatialNavigation } from "../utils/tvNavigation";
 import { AboutView } from "./AboutView";
 import { HeroCarousel } from "./HeroCarousel";
+import { TiltedStoryWall } from "./TiltedStoryWall";
 
 export type ShelfTab = "books" | "videos" | "about";
 
@@ -79,6 +80,9 @@ export function HomeShelf({
 
   return (
     <div className="shelf-shell" ref={shelfRef}>
+      {activeTab === "books" && books[carouselIndex] && (
+        <TiltedStoryWall book={books[carouselIndex]} />
+      )}
       <header className="shelf-header">
         <div className="brand-group">
           <img className="brand-logo" src="./logo.jpg" alt="Lea Books Logo" />
