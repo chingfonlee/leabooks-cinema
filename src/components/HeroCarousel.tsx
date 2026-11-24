@@ -34,7 +34,7 @@ export function HeroCarousel({
     onChangeIndex((activeIndex + 1) % total);
   }, [activeIndex, onChangeIndex, total]);
 
-  // Direct Left/Right looping when Hero stage or cover is focused (makes TV remote browsing effortless!)
+  // Direct Left/Right infinite looping when the main cover is focused on TV remote
   useEffect(() => {
     if (!keyboardActive) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -60,9 +60,7 @@ export function HeroCarousel({
 
   if (total === 0) return null;
 
-  const prevBook = books[(activeIndex - 1 + total) % total];
   const currentBook = books[activeIndex] ?? books[0];
-  const nextBook = books[(activeIndex + 1) % total];
 
   const handleTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0];
@@ -89,26 +87,10 @@ export function HeroCarousel({
       onTouchEnd={handleTouchEnd}
       aria-label={strings.tabBooks}
     >
-      {/* Main 3-poster infinite circular stage */}
-      <div className="hero-stage-row">
+      {/* Full-detail, uncropped wide cover stage */}
+      <div className="hero-cover-stage">
         <button
-          className="hero-side-card hero-side-left"
-          onClick={goPrev}
-          aria-label={prevBook.title[language]}
-          tabIndex={-1}
-        >
-          <img
-            className="hero-side-img"
-            src={prevBook.coverImage}
-            alt={prevBook.title[language]}
-          />
-          <span className="hero-side-arrow">
-            <ChevronLeft size={36} />
-          </span>
-        </button>
-
-        <button
-          className="hero-center-card"
+          className="hero-cover-frame"
           data-autofocus="true"
           data-hero-cover="true"
           onClick={() => onOpenBook(currentBook.slug, false)}
@@ -116,74 +98,76 @@ export function HeroCarousel({
         >
           <img
             key={currentBook.slug}
-            className="hero-center-img"
+            className="hero-cover-full-img"
             src={currentBook.coverImage}
             alt={currentBook.title[language]}
+            draggable={false}
           />
-          <span className="hero-order-pill">
-            {String(currentBook.order).padStart(2, "0")} / {String(total).padStart(2, "0")}
-          </span>
-        </button>
-
-        <button
-          className="hero-side-card hero-side-right"
-          onClick={goNext}
-          aria-label={nextBook.title[language]}
-          tabIndex={-1}
-        >
-          <img
-            className="hero-side-img"
-            src={nextBook.coverImage}
-            alt={nextBook.title[language]}
-          />
-          <span className="hero-side-arrow">
-            <ChevronRight size={36} />
-          </span>
         </button>
       </div>
 
-      {/* Below-cover Book Summary & Theater Actions */}
-      <div className="hero-info-panel" key={`${currentBook.slug}-${language}`}>
-        <div className="hero-title-row">
-          <h1 className="hero-book-title">{currentBook.title[language]}</h1>
-          <span className="hero-page-badge">
-            {currentBook.pageCount} {strings.pagesUnit}
-          </span>
+      {/* Unified bottom theater dock: [Prev] [Title + Summary] [Read + Autoplay] [Next] */}
+      <div className="hero-bottom-dock">
+        <button
+          className="hero-nav-circle"
+          onClick={goPrev}
+          aria-label="Previous book"
+        >
+          <ChevronLeft size={30} />
+        </button>
+
+        <div className="hero-dock-meta" key={`${currentBook.slug}-${language}`}>
+          <div className="hero-title-row">
+            <span className="hero-order-tag">
+              {String(currentBook.order).padStart(2, "0")} /{" "}
+              {String(total).padStart(2, "0")}
+            </span>
+            <h1 className="hero-book-title">{currentBook.title[language]}</h1>
+            <span className="hero-page-badge">
+              {currentBook.pageCount} {strings.pagesUnit}
+            </span>
+          </div>
+          <p className="hero-book-summary">{currentBook.summary[language]}</p>
         </div>
 
-        <p className="hero-book-summary">{currentBook.summary[language]}</p>
-
-        <div className="hero-cta-row">
+        <div className="hero-dock-actions">
           <button
             className="action-btn primary hero-cta-btn"
             onClick={() => onOpenBook(currentBook.slug, false)}
           >
-            <BookOpen size={22} />
+            <BookOpen size={20} />
             {strings.btnStartReading}
           </button>
           <button
             className="action-btn hero-cta-btn"
             onClick={() => onOpenBook(currentBook.slug, true)}
           >
-            <Play size={20} />
+            <Play size={18} />
             {strings.btnAutoplayBook} ({pageDurationSec}s)
           </button>
         </div>
 
-        {/* Circular indicator dots */}
-        <div className="hero-dots-row" role="tablist" aria-label="Book selector">
-          {books.map((book, idx) => (
-            <button
-              key={book.slug}
-              className={`hero-dot ${idx === activeIndex ? "active" : ""}`}
-              onClick={() => onChangeIndex(idx)}
-              aria-label={book.title[language]}
-              aria-selected={idx === activeIndex}
-              tabIndex={-1}
-            />
-          ))}
-        </div>
-        <div className="hero-hint-text">{strings.carouselHint}</div>
+        <button
+          className="hero-nav-circle"
+          onClick={goNext}
+          aria-label="Next book"
+        >
+          <ChevronRight size={30} />
+        </button>
+      </div>
+
+      {/* Compact indicator dots */}
+      <div className="hero-dots-row" role="tablist" aria-label="Book selector">
+        {books.map((book, idx) => (
+          <button
+            key={book.slug}
+            className={`hero-dot ${idx === activeIndex ? "active" : ""}`}
+            onClick={() => onChangeIndex(idx)}
+            aria-label={book.title[language]}
+            aria-selected={idx === activeIndex}
+            tabIndex={-1}
+          />
+        ))}
       </div>
     </section>
   );
