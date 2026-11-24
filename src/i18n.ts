@@ -15,6 +15,7 @@ export const LANGUAGE_SHORT: Record<LanguageCode, string> = {
 export interface UiStrings {
   brandSub: string;
   tabBooks: string;
+  tabShelf: string;
   tabVideos: string;
   tabAbout: string;
   btnAutoplayAll: string;
@@ -74,6 +75,7 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
   zh: {
     brandSub: "GATE STORY",
     tabBooks: "繪本",
+    tabShelf: "書架",
     tabVideos: "影片",
     tabAbout: "關於",
     btnAutoplayAll: "自動輪播",
@@ -133,6 +135,7 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
   en: {
     brandSub: "GATE STORY",
     tabBooks: "Picture Books",
+    tabShelf: "Bookshelf",
     tabVideos: "Videos",
     tabAbout: "About",
     btnAutoplayAll: "Autoplay",
@@ -193,6 +196,7 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
   cs: {
     brandSub: "GATE STORY",
     tabBooks: "Obrázkové knihy",
+    tabShelf: "Knihovna",
     tabVideos: "Videa",
     tabAbout: "O projektu",
     btnAutoplayAll: "Automaticky",

@@ -3,7 +3,7 @@ import {
   BookOpen,
   Film,
   FolderOpen,
-  Info,
+  LayoutGrid,
   Play,
   RefreshCw,
   Settings,
@@ -19,10 +19,11 @@ import type {
 } from "../types";
 import { useSpatialNavigation } from "../utils/tvNavigation";
 import { AboutView } from "./AboutView";
+import { BookshelfView } from "./BookshelfView";
 import { HeroCarousel } from "./HeroCarousel";
 import { TiltedStoryWall } from "./TiltedStoryWall";
 
-export type ShelfTab = "books" | "videos" | "about";
+export type ShelfTab = "books" | "shelf" | "videos" | "about";
 
 interface HomeShelfProps {
   activeTab: ShelfTab;
@@ -78,9 +79,11 @@ export function HomeShelf({
   const nativeAndroid = isNativeAndroid();
   const showVideosTab = nativeAndroid || ENABLE_WEB_YOUTUBE_TAB;
 
+  const isBookMode = activeTab === "books" || activeTab === "shelf";
+
   return (
     <div className="shelf-shell" ref={shelfRef}>
-      {activeTab === "books" && books[carouselIndex] && (
+      {isBookMode && books[carouselIndex] && (
         <TiltedStoryWall book={books[carouselIndex]} />
       )}
       <header className="shelf-header">
@@ -92,34 +95,44 @@ export function HomeShelf({
           </div>
         </div>
 
-        <nav className="tab-switcher" aria-label="Main navigation">
-          <button
-            className={`tab-btn ${activeTab === "books" ? "active" : ""}`}
-            onClick={() => onTabChange("books")}
-          >
-            <BookOpen size={20} />
-            {strings.tabBooks}
-          </button>
-
-          {showVideosTab && (
+        <div className="nav-cluster">
+          <nav className="tab-switcher" aria-label="Main navigation">
             <button
-              className={`tab-btn ${activeTab === "videos" ? "active" : ""}`}
-              onClick={() => onTabChange("videos")}
+              className={`tab-btn ${activeTab === "books" ? "active" : ""}`}
+              onClick={() => onTabChange("books")}
             >
-              <Film size={20} />
-              {strings.tabVideos}
-              {nativeAndroid ? ` (${videos.length})` : ""}
+              <BookOpen size={20} />
+              {strings.tabBooks}
             </button>
-          )}
+
+            <button
+              className={`tab-btn ${activeTab === "shelf" ? "active" : ""}`}
+              onClick={() => onTabChange("shelf")}
+            >
+              <LayoutGrid size={20} />
+              {strings.tabShelf}
+            </button>
+
+            {showVideosTab && (
+              <button
+                className={`tab-btn ${activeTab === "videos" ? "active" : ""}`}
+                onClick={() => onTabChange("videos")}
+              >
+                <Film size={20} />
+                {strings.tabVideos}
+                {nativeAndroid ? ` (${videos.length})` : ""}
+              </button>
+            )}
+          </nav>
 
           <button
-            className={`tab-btn ${activeTab === "about" ? "active" : ""}`}
+            type="button"
+            className={`nav-about-link ${activeTab === "about" ? "active" : ""}`}
             onClick={() => onTabChange("about")}
           >
-            <Info size={20} />
             {strings.tabAbout}
           </button>
-        </nav>
+        </div>
 
         <div className="header-actions">
           <div className="lang-switcher" role="group" aria-label="Language">
@@ -134,7 +147,7 @@ export function HomeShelf({
             ))}
           </div>
 
-          {activeTab === "books" && (
+          {isBookMode && (
             <button className="action-btn primary" onClick={onOpenAutoplayModal}>
               <Play size={18} />
               <span className="btn-label">{strings.btnAutoplayAll}</span>
@@ -148,7 +161,7 @@ export function HomeShelf({
         </div>
       </header>
 
-      <main className={`shelf-content ${activeTab === "books" ? "carousel-mode" : ""}`}>
+      <main className={`shelf-content ${isBookMode ? "carousel-mode" : ""}`}>
         {activeTab === "books" && (
           <HeroCarousel
             books={books}
@@ -156,6 +169,18 @@ export function HomeShelf({
             language={language}
             musicMuted={musicMuted}
             keyboardActive={spatialNavEnabled}
+            onChangeIndex={onCarouselIndexChange}
+            onToggleMute={onToggleMute}
+            onOpenBook={onOpenBook}
+          />
+        )}
+
+        {activeTab === "shelf" && (
+          <BookshelfView
+            books={books}
+            activeIndex={carouselIndex}
+            language={language}
+            musicMuted={musicMuted}
             onChangeIndex={onCarouselIndexChange}
             onToggleMute={onToggleMute}
             onOpenBook={onOpenBook}
