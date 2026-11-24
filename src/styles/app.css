@@ -1278,16 +1278,36 @@ body,
     border-radius: 14px;
   }
   .hero-bottom-dock {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    align-items: center;
     padding: 12px 12px;
     gap: 10px;
     border-radius: 16px;
+  }
+  .hero-nav-prev {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .hero-dock-meta {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: center;
+  }
+  .hero-title-row {
+    justify-content: center;
+  }
+  .hero-nav-next {
+    grid-column: 3;
+    grid-row: 1;
   }
   .hero-nav-circle {
     width: 44px;
     height: 44px;
   }
   .hero-dock-actions {
+    grid-column: 1 / -1;
+    grid-row: 2;
     width: 100%;
     justify-content: center;
   }

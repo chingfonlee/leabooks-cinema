@@ -107,7 +107,7 @@ export function HeroCarousel({
       {/* Unified bottom theater dock: [Prev] [Title + Summary] [Read + Autoplay] [Next] */}
       <div className="hero-bottom-dock">
         <button
-          className="hero-nav-circle"
+          className="hero-nav-circle hero-nav-prev"
           onClick={goPrev}
           aria-label="Previous book"
         >
@@ -143,7 +143,7 @@ export function HeroCarousel({
         </div>
 
         <button
-          className="hero-nav-circle"
+          className="hero-nav-circle hero-nav-next"
           onClick={goNext}
           aria-label="Next book"
         >
