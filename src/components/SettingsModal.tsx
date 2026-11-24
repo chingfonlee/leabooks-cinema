@@ -10,7 +10,7 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
-const PAGE_DURATIONS = [10, 15, 20, 30];
+const PAGE_DURATIONS = [0, 10, 15, 20, 30];
 const IDLE_VALUES = [30, 60, 90, 0];
 
 export function SettingsModal({
@@ -50,7 +50,7 @@ export function SettingsModal({
                   className={`option-pill ${settings.pageDurationSec === sec ? "active" : ""}`}
                   onClick={() => onChange({ ...settings, pageDurationSec: sec })}
                 >
-                  {strings.secUnit(sec)}
+                  {sec === 0 ? strings.smartPace : strings.secUnit(sec)}
                 </button>
               ))}
             </div>

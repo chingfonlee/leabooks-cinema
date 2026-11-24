@@ -8,6 +8,25 @@ export interface SubtitleSegment {
 
 const MIN_SEGMENT_DURATION_MS = 2200;
 
+/**
+ * Compute comfortable autoplay page duration (seconds) based on page index and character count:
+ * - Pages 1-2 (cover & title intro): always 5s
+ * - Pages 3+: base 3s + reading pace (~11 zh chars/s or ~22 latin chars/s), clamped to 5..35s
+ */
+export function computeSmartPageDurationSec(
+  rawText: string,
+  pageIndex: number,
+  lang: LanguageCode = "zh",
+): number {
+  if (pageIndex < 2) return 5;
+  const compact = rawText.replace(/\s+/g, "").trim();
+  if (!compact) return 5;
+
+  const charsPerSec = lang === "zh" ? 11 : 22;
+  const estimated = Math.round(3 + compact.length / charsPerSec);
+  return Math.max(5, Math.min(35, estimated));
+}
+
 function splitLatinSentence(sentence: string, maxChars: number): string[] {
   const words = sentence.split(/\s+/).filter(Boolean);
   const out: string[] = [];

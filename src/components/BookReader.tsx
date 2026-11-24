@@ -13,6 +13,7 @@ import { LANGUAGE_SHORT, UI_STRINGS } from "../i18n";
 import type { AppSettings, CinemaBook, LanguageCode } from "../types";
 import {
   buildSubtitleSegments,
+  computeSmartPageDurationSec,
   getSegmentIndexAtTime,
 } from "../utils/subtitles";
 import { findNextFocusable, focusElementForTv } from "../utils/tvNavigation";
@@ -58,7 +59,13 @@ export function BookReader({
   const strings = UI_STRINGS[lang];
   const currentBook = playlist[bookIdx] ?? playlist[0];
   const currentPage = currentBook.pages[pageIdx] ?? currentBook.pages[0];
-  const pageDurationMs = settings.pageDurationSec * 1000;
+  const currentPageDurationSec =
+    settings.pageDurationSec === 0
+      ? computeSmartPageDurationSec(currentPage.text[lang], pageIdx, lang)
+      : pageIdx < 2
+        ? 5
+        : settings.pageDurationSec;
+  const pageDurationMs = currentPageDurationSec * 1000;
 
   const segments = useMemo(() => {
     const raw = currentPage.text[lang];
@@ -406,7 +413,7 @@ export function BookReader({
           >
             {isAutoPlaying ? <Pause size={18} /> : <Play size={18} />}
             {isAutoPlaying
-              ? strings.autoplaying(settings.pageDurationSec)
+              ? strings.autoplaying(currentPageDurationSec)
               : strings.startAutoplay}
           </button>
           <button
@@ -485,6 +492,30 @@ export function BookReader({
           )}
         </div>
       )}
+
+      {/* Subtle mobile-only bottom edge page-turn arrows */}
+      <div
+        className="mobile-reader-nav-hint"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="mobile-nav-arrow-btn"
+          aria-label="Previous page"
+          onClick={goToPrevPage}
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <span className="mobile-nav-page-num">
+          {pageIdx + 1} / {currentBook.pages.length}
+        </span>
+        <button
+          className="mobile-nav-arrow-btn"
+          aria-label="Next page"
+          onClick={() => goToNextPage(false)}
+        >
+          <ChevronRight size={18} />
+        </button>
+      </div>
 
       {isAutoPlaying && (
         <div className="autoplay-progress-track" aria-hidden="true">

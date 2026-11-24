@@ -51,16 +51,16 @@ export interface YouTubeVideoItem {
 
 export interface AppSettings {
   language: LanguageCode;
-  pageDurationSec: number; // default 15
-  idleResumeSec: number; // default 60 (0 = disabled)
+  pageDurationSec: number; // 0 = smart by word count (5-35s), or fixed seconds (10/15/20/30)
+  idleResumeSec: number; // default 30 (0 = disabled)
   musicVolume: number; // 0..1
   musicMuted: boolean;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
   language: "zh",
-  pageDurationSec: 15,
+  pageDurationSec: 0,
   idleResumeSec: 30,
-  musicVolume: 0.7,
+  musicVolume: 0.25,
   musicMuted: false,
 };

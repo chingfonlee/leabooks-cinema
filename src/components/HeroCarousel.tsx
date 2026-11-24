@@ -7,7 +7,6 @@ interface HeroCarouselProps {
   books: CinemaBook[];
   activeIndex: number;
   language: LanguageCode;
-  pageDurationSec: number;
   keyboardActive: boolean;
   onChangeIndex: (nextIndex: number) => void;
   onOpenBook: (slug: string, autoplay: boolean) => void;
@@ -17,7 +16,6 @@ export function HeroCarousel({
   books,
   activeIndex,
   language,
-  pageDurationSec,
   keyboardActive,
   onChangeIndex,
   onOpenBook,
@@ -118,11 +116,11 @@ export function HeroCarousel({
 
         <div className="hero-dock-meta" key={`${currentBook.slug}-${language}`}>
           <div className="hero-title-row">
+            <h1 className="hero-book-title">{currentBook.title[language]}</h1>
             <span className="hero-order-tag">
               {String(currentBook.order).padStart(2, "0")} /{" "}
               {String(total).padStart(2, "0")}
             </span>
-            <h1 className="hero-book-title">{currentBook.title[language]}</h1>
           </div>
           <p className="hero-book-summary">{currentBook.summary[language]}</p>
         </div>
@@ -140,7 +138,7 @@ export function HeroCarousel({
             onClick={() => onOpenBook(currentBook.slug, true)}
           >
             <Play size={18} />
-            {strings.btnAutoplayBook} ({pageDurationSec}s)
+            {strings.btnAutoplayBook}
           </button>
         </div>
 

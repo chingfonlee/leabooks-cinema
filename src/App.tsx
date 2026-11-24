@@ -21,7 +21,7 @@ import {
   type YouTubeVideoItem,
 } from "./types";
 
-const SETTINGS_STORAGE_KEY = "leabooks-cinema-settings-v2";
+const SETTINGS_STORAGE_KEY = "leabooks-cinema-settings-v4";
 
 function loadSettings(): AppSettings {
   try {
@@ -241,7 +241,6 @@ export function App() {
         books={CINEMA_BOOKS}
         carouselIndex={carouselIndex}
         onCarouselIndexChange={setCarouselIndex}
-        pageDurationSec={settings.pageDurationSec}
         videos={videos}
         videoFolderName={videoFolderName}
         videoLoading={videoLoading}

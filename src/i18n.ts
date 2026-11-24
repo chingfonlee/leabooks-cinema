@@ -40,6 +40,7 @@ export interface UiStrings {
   settingsTitle: string;
   settingPageDurTitle: string;
   settingPageDurDesc: string;
+  smartPace: string;
   settingIdleTitle: string;
   settingIdleDesc: string;
   settingMusicTitle: string;
@@ -72,13 +73,13 @@ export interface UiStrings {
 export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
   zh: {
     brandSub: "GATE STORY",
-    tabBooks: "繪本劇場",
-    tabVideos: "繪本影片",
-    tabAbout: "關於我們",
+    tabBooks: "繪本",
+    tabVideos: "影片",
+    tabAbout: "關於",
     btnAutoplayAll: "自動輪播",
     btnSettings: "設定",
-    btnStartReading: "開始閱讀",
-    btnAutoplayBook: "自動播放",
+    btnStartReading: "閱讀",
+    btnAutoplayBook: "播放",
     pagesUnit: "頁",
     backToShelf: "返回書架",
     backToVideos: "返回影片牆",
@@ -89,7 +90,8 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
     muted: "靜音",
     music: "音樂",
     manualIdleHint: (s) => `手動翻頁中・${s} 秒後恢復自動播放`,
-    autoplayModalTitle: (s) => `自動輪播設定（每頁 ${s} 秒）`,
+    autoplayModalTitle: (s) =>
+      s === 0 ? "自動輪播設定（智慧依字數）" : `自動輪播設定（每頁 ${s} 秒）`,
     selectAll: (n) => `全選 ${n} 本`,
     clearAll: "全部取消",
     selectedHint: (n) => `已選 ${n} 本（單選循環重播；多選依序連續輪播）`,
@@ -97,7 +99,8 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
     startPlaylist: (n) => `開始自動輪播（${n} 本）`,
     settingsTitle: "播放與顯示設定",
     settingPageDurTitle: "自動翻頁秒數",
-    settingPageDurDesc: "自動播放時，每一頁停留的時間（預設 15 秒）",
+    settingPageDurDesc: "前 2 頁固定 5 秒；第 3 頁起可依字數智慧配速（5～35 秒）或固定秒數",
+    smartPace: "智慧（依字數）",
     settingIdleTitle: "閒置自動恢復秒數",
     settingIdleDesc: "觸控暫停自動播放後，無人操作多久自動恢復輪播（預設 30 秒）",
     settingMusicTitle: "繪本背景音樂",
@@ -146,7 +149,8 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
     muted: "Muted",
     music: "Music",
     manualIdleHint: (s) => `Manual mode · Autoplay resumes in ${s}s`,
-    autoplayModalTitle: (s) => `Autoplay Playlist (${s}s / page)`,
+    autoplayModalTitle: (s) =>
+      s === 0 ? "Autoplay Playlist (Smart Pace)" : `Autoplay Playlist (${s}s / page)`,
     selectAll: (n) => `Select All (${n})`,
     clearAll: "Clear All",
     selectedHint: (n) =>
@@ -155,7 +159,8 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
     startPlaylist: (n) => `Start Autoplay (${n})`,
     settingsTitle: "Playback Settings",
     settingPageDurTitle: "Autoplay Page Duration",
-    settingPageDurDesc: "Seconds per page during autoplay (default 15s)",
+    settingPageDurDesc: "First 2 pages stay 5s; pages 3+ auto-pace by text length (5–35s) or fixed seconds",
+    smartPace: "Smart (Auto)",
     settingIdleTitle: "Idle Auto-Resume",
     settingIdleDesc: "Resume autoplay automatically after inactivity (default 30s)",
     settingMusicTitle: "Background Music",
@@ -204,7 +209,8 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
     muted: "Ztlumeno",
     music: "Hudba",
     manualIdleHint: (s) => `Ruční režim · Automaticky za ${s}s`,
-    autoplayModalTitle: (s) => `Automatické přehrávání (${s}s / strana)`,
+    autoplayModalTitle: (s) =>
+      s === 0 ? "Automatické přehrávání (Chytré tempo)" : `Automatické přehrávání (${s}s / strana)`,
     selectAll: (n) => `Vybrat vše (${n})`,
     clearAll: "Zrušit vše",
     selectedHint: (n) =>
@@ -213,7 +219,8 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
     startPlaylist: (n) => `Spustit (${n})`,
     settingsTitle: "Nastavení přehrávání",
     settingPageDurTitle: "Délka stránky",
-    settingPageDurDesc: "Počet sekund na stránku při automatickém přehrávání",
+    settingPageDurDesc: "První 2 strany 5 s; od 3. strany chytré tempo dle textu (5–35 s) nebo pevný čas",
+    smartPace: "Chytré (dle textu)",
     settingIdleTitle: "Obnovení po nečinnosti",
     settingIdleDesc: "Po kolika sekundách nečinnosti se obnoví automatické přehrávání",
     settingMusicTitle: "Hudba na pozadí",
