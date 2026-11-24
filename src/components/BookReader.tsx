@@ -56,11 +56,14 @@ export function BookReader({
   const [bookIdx, setBookIdx] = useState(initialBookIndex);
   const [pageIdx, setPageIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(initialAutoplay);
-  const [autoResumeArmed, setAutoResumeArmed] = useState(initialAutoplay);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [manualSegIdx, setManualSegIdx] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [idleRemainingSec, setIdleRemainingSec] = useState<number | null>(null);
+  const [idleRemainingSec, setIdleRemainingSec] = useState<number | null>(
+    !initialAutoplay && settings.idleResumeSec > 0
+      ? settings.idleResumeSec
+      : null,
+  );
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const topBarRef = useRef<HTMLDivElement | null>(null);
@@ -125,12 +128,16 @@ export function BookReader({
   }, []);
 
   const showControlsTemporarily = useCallback(() => {
+    lastActivityRef.current = Date.now();
+    if (!isAutoPlaying && settings.idleResumeSec > 0) {
+      setIdleRemainingSec(settings.idleResumeSec);
+    }
     setControlsVisible(true);
     if (controlsTimerRef.current) window.clearTimeout(controlsTimerRef.current);
     controlsTimerRef.current = window.setTimeout(() => {
       setControlsVisible(false);
     }, 3000);
-  }, []);
+  }, [isAutoPlaying, settings.idleResumeSec]);
 
   useEffect(() => {
     return () => {
@@ -146,7 +153,6 @@ export function BookReader({
       }
       if (pauseIfAuto && isAutoPlaying) {
         setIsAutoPlaying(false);
-        setAutoResumeArmed(true);
       }
       if (settings.idleResumeSec > 0) {
         setIdleRemainingSec(settings.idleResumeSec);
@@ -218,10 +224,13 @@ export function BookReader({
   }, [isAutoPlaying, pageDurationMs, goToNextPage]);
 
   useEffect(() => {
-    if (isAutoPlaying || !autoResumeArmed || settings.idleResumeSec <= 0) {
+    if (isAutoPlaying || settings.idleResumeSec <= 0) {
       setIdleRemainingSec(null);
       return;
     }
+
+    lastActivityRef.current = Date.now();
+    setIdleRemainingSec(settings.idleResumeSec);
 
     const timer = window.setInterval(() => {
       const idleSec = Math.floor((Date.now() - lastActivityRef.current) / 1000);
@@ -236,7 +245,7 @@ export function BookReader({
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [isAutoPlaying, autoResumeArmed, settings.idleResumeSec]);
+  }, [isAutoPlaying, settings.idleResumeSec]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -347,10 +356,8 @@ export function BookReader({
     lastActivityRef.current = Date.now();
     if (isAutoPlaying) {
       setIsAutoPlaying(false);
-      setAutoResumeArmed(false);
     } else {
       setElapsedMs(0);
-      setAutoResumeArmed(true);
       setIsAutoPlaying(true);
     }
     showControlsTemporarily();
@@ -625,6 +632,7 @@ export function BookReader({
           aria-label={isMuted ? strings.muted : strings.music}
           onClick={(e) => {
             e.stopPropagation();
+            noteUserInteraction(false);
             onToggleMute();
           }}
         >
