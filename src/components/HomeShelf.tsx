@@ -31,6 +31,8 @@ interface HomeShelfProps {
   books: CinemaBook[];
   carouselIndex: number;
   onCarouselIndexChange: (idx: number) => void;
+  musicMuted: boolean;
+  onToggleMute: () => void;
   videos: LocalVideoItem[];
   videoFolderName: string;
   videoLoading: boolean;
@@ -54,6 +56,8 @@ export function HomeShelf({
   books,
   carouselIndex,
   onCarouselIndexChange,
+  musicMuted,
+  onToggleMute,
   videos,
   videoFolderName,
   videoLoading,
@@ -146,8 +150,10 @@ export function HomeShelf({
             books={books}
             activeIndex={carouselIndex}
             language={language}
+            musicMuted={musicMuted}
             keyboardActive={spatialNavEnabled}
             onChangeIndex={onCarouselIndexChange}
+            onToggleMute={onToggleMute}
             onOpenBook={onOpenBook}
           />
         )}

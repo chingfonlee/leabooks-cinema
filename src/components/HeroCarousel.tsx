@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef } from "react";
-import { BookOpen, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import type { CinemaBook, LanguageCode } from "../types";
 import { UI_STRINGS } from "../i18n";
 
@@ -7,8 +14,10 @@ interface HeroCarouselProps {
   books: CinemaBook[];
   activeIndex: number;
   language: LanguageCode;
+  musicMuted: boolean;
   keyboardActive: boolean;
   onChangeIndex: (nextIndex: number) => void;
+  onToggleMute: () => void;
   onOpenBook: (slug: string, autoplay: boolean) => void;
 }
 
@@ -16,8 +25,10 @@ export function HeroCarousel({
   books,
   activeIndex,
   language,
+  musicMuted,
   keyboardActive,
   onChangeIndex,
+  onToggleMute,
   onOpenBook,
 }: HeroCarouselProps) {
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -139,6 +150,14 @@ export function HeroCarousel({
           >
             <Play size={18} />
             {strings.btnAutoplayBook}
+          </button>
+          <button
+            className={`hero-mute-btn ${musicMuted ? "muted" : ""}`}
+            onClick={onToggleMute}
+            aria-label={musicMuted ? strings.muted : strings.music}
+            title={musicMuted ? strings.muted : strings.music}
+          >
+            {musicMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </button>
         </div>
 

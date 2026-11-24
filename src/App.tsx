@@ -241,6 +241,10 @@ export function App() {
         books={CINEMA_BOOKS}
         carouselIndex={carouselIndex}
         onCarouselIndexChange={setCarouselIndex}
+        musicMuted={settings.musicMuted}
+        onToggleMute={() =>
+          updateSettings({ ...settings, musicMuted: !settings.musicMuted })
+        }
         videos={videos}
         videoFolderName={videoFolderName}
         videoLoading={videoLoading}
