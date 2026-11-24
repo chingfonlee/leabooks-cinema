@@ -98,7 +98,7 @@ export function BookshelfView({
           <div
             className="bookshelf-grid"
             style={{
-              gridTemplateColumns: `repeat(${columnCount}, var(--bookshelf-card-w, 330px))`,
+              gridTemplateColumns: `repeat(${columnCount}, var(--bookshelf-card-w, 500px))`,
             }}
           >
             {books.map((book, idx) => {
@@ -130,9 +130,6 @@ export function BookshelfView({
                     <span className="bookshelf-order-badge">
                       {String(book.order).padStart(2, "0")}
                     </span>
-                  </div>
-                  <div className="bookshelf-card-meta">
-                    <span className="bookshelf-card-title">{book.title[language]}</span>
                   </div>
                 </button>
               );
