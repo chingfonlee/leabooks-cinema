@@ -4,8 +4,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,
-  Pause,
-  Play,
+  MicVocal,
   SkipForward,
   Volume1,
   Volume2,
@@ -21,7 +20,7 @@ import type {
 } from "../types";
 import {
   buildSubtitleSegments,
-  computeSmartPageDurationSec,
+  computeBookPageDurationsSec,
   getSegmentIndexAtTime,
 } from "../utils/subtitles";
 import { findNextFocusable, focusElementForTv } from "../utils/tvNavigation";
@@ -56,6 +55,9 @@ export function BookReader({
   const [bookIdx, setBookIdx] = useState(initialBookIndex);
   const [pageIdx, setPageIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(initialAutoplay);
+  // Entry 1/2 (reading, initialAutoplay=false) -> BGM; Entry 3/4 (play/playlist, initialAutoplay=true) -> vocal theme song if available
+  const [preferThemeSong, setPreferThemeSong] = useState(initialAutoplay);
+  const [runtimeSongDurationSec, setRuntimeSongDurationSec] = useState<number | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [manualSegIdx, setManualSegIdx] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(false);
@@ -67,7 +69,7 @@ export function BookReader({
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const topBarRef = useRef<HTMLDivElement | null>(null);
-  const autoplayBtnRef = useRef<HTMLButtonElement | null>(null);
+  const songToggleBtnRef = useRef<HTMLButtonElement | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
   const controlsTimerRef = useRef<number | null>(null);
@@ -76,9 +78,26 @@ export function BookReader({
   const strings = UI_STRINGS[lang];
   const currentBook = playlist[bookIdx] ?? playlist[0];
   const currentPage = currentBook.pages[pageIdx] ?? currentBook.pages[0];
+
+  const hasThemeSong = Boolean(currentBook.themeSongSrc);
+  const isUsingThemeSong = hasThemeSong && preferThemeSong;
+  const activeAudioSrc = isUsingThemeSong
+    ? currentBook.themeSongSrc
+    : currentBook.musicSrc;
+
+  const effectiveSongDurationSec = isUsingThemeSong
+    ? (currentBook.themeSongDurationSec ?? runtimeSongDurationSec)
+    : null;
+
+  const bookPageDurationsSec = useMemo(
+    () =>
+      computeBookPageDurationsSec(currentBook, lang, effectiveSongDurationSec),
+    [currentBook, lang, effectiveSongDurationSec],
+  );
+
   const currentPageDurationSec =
     settings.pageDurationSec === 0
-      ? computeSmartPageDurationSec(currentPage.text[lang], pageIdx, lang)
+      ? (bookPageDurationsSec[pageIdx] ?? 5)
       : pageIdx < 2
         ? 5
         : settings.pageDurationSec;
@@ -111,6 +130,10 @@ export function BookReader({
   }, [currentBook, pageIdx]);
 
   useEffect(() => {
+    setRuntimeSongDurationSec(null);
+  }, [activeAudioSrc]);
+
+  useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
     audio.volume = settings.musicMuted ? 0 : settings.musicVolume;
@@ -118,7 +141,7 @@ export function BookReader({
     if (!settings.musicMuted) {
       audio.play().catch(() => {});
     }
-  }, [currentBook.musicSrc, settings.musicMuted, settings.musicVolume]);
+  }, [activeAudioSrc, settings.musicMuted, settings.musicVolume]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -305,7 +328,12 @@ export function BookReader({
         noteUserInteraction(false);
         showControlsTemporarily();
         window.requestAnimationFrame(() => {
-          focusElementForTv(autoplayBtnRef.current);
+          const target =
+            songToggleBtnRef.current ??
+            (topBarRef.current
+              ? findNextFocusable(topBarRef.current, null, "right")
+              : null);
+          focusElementForTv(target);
         });
       } else if (e.key === "Escape") {
         e.preventDefault();
@@ -351,18 +379,6 @@ export function BookReader({
     }
   };
 
-  const handleToggleAutoplay = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    lastActivityRef.current = Date.now();
-    if (isAutoPlaying) {
-      setIsAutoPlaying(false);
-    } else {
-      setElapsedMs(0);
-      setIsAutoPlaying(true);
-    }
-    showControlsTemporarily();
-  };
-
   const progressPercent = isAutoPlaying
     ? Math.min(100, (elapsedMs / pageDurationMs) * 100)
     : 0;
@@ -388,13 +404,19 @@ export function BookReader({
         }
       }}
     >
-      {currentBook.musicSrc && (
+      {activeAudioSrc && (
         <audio
-          key={currentBook.musicSrc}
+          key={activeAudioSrc}
           ref={audioRef}
-          src={currentBook.musicSrc}
+          src={activeAudioSrc}
           loop
           preload="auto"
+          onLoadedMetadata={(e) => {
+            const d = e.currentTarget.duration;
+            if (Number.isFinite(d) && d > 0) {
+              setRuntimeSongDurationSec(d);
+            }
+          }}
         />
       )}
 
@@ -438,16 +460,27 @@ export function BookReader({
               {strings.nextBook} ({bookIdx + 1}/{playlist.length})
             </button>
           )}
-          <button
-            ref={autoplayBtnRef}
-            className={`reader-pill-btn ${isAutoPlaying ? "active" : ""}`}
-            onClick={handleToggleAutoplay}
-          >
-            {isAutoPlaying ? <Pause size={18} /> : <Play size={18} />}
-            {isAutoPlaying
-              ? strings.autoplaying(currentPageDurationSec)
-              : strings.startAutoplay}
-          </button>
+          {hasThemeSong && (
+            <button
+              ref={songToggleBtnRef}
+              type="button"
+              className={`reader-icon-pill-btn ${isUsingThemeSong ? "active" : ""}`}
+              aria-label={
+                isUsingThemeSong ? strings.switchToBgm : strings.switchToThemeSong
+              }
+              title={
+                isUsingThemeSong ? strings.switchToBgm : strings.switchToThemeSong
+              }
+              aria-pressed={isUsingThemeSong}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreferThemeSong((prev) => !prev);
+                showControlsTemporarily();
+              }}
+            >
+              <MicVocal size={19} />
+            </button>
+          )}
 
           {/* Graphical font-size control: 3 stepped A buttons */}
           <div

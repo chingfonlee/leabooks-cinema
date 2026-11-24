@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
@@ -18,8 +19,10 @@ const sourceAboutDir = path.join(sourceRoot, "docs", "about");
 const sourceLogoPath = path.join(sourceRoot, "docs", "logo.jpg");
 
 const customMusicDir = path.join(projectRoot, "custom-music");
+const themeSongsDir = path.join(projectRoot, "music", "songs");
 const targetPublicBooks = path.join(projectRoot, "public", "books");
 const targetSharedAudio = path.join(targetPublicBooks, "_shared");
+const targetSongsDir = path.join(targetPublicBooks, "_songs");
 const targetLogoPath = path.join(projectRoot, "public", "logo.jpg");
 const targetBooksJson = path.join(projectRoot, "src", "data", "books.generated.json");
 const targetAboutJson = path.join(projectRoot, "src", "data", "about.generated.json");
@@ -56,7 +59,54 @@ sourceBooks.sort((a, b) =>
 
 fs.rmSync(targetPublicBooks, { recursive: true, force: true });
 fs.mkdirSync(targetSharedAudio, { recursive: true });
+fs.mkdirSync(targetSongsDir, { recursive: true });
 fs.mkdirSync(path.dirname(targetBooksJson), { recursive: true });
+
+function normalizeMatchKey(input) {
+  return String(input ?? "")
+    .replace(/\.mp3$/i, "")
+    .replace(/^\d+[\s._-]*/, "")
+    .replace(/[\s\p{P}\p{S}]+/gu, "")
+    .toLowerCase()
+    .trim();
+}
+
+function probeAudioDurationSec(filePath) {
+  try {
+    const out = execFileSync(
+      "ffprobe",
+      [
+        "-v",
+        "error",
+        "-show_entries",
+        "format=duration",
+        "-of",
+        "default=noprint_wrappers=1:nokey=1",
+        filePath,
+      ],
+      { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+    ).trim();
+    const val = Number.parseFloat(out);
+    if (Number.isFinite(val) && val > 0) {
+      return Math.round(val * 100) / 100;
+    }
+  } catch {
+    // ffprobe unavailable; runtime onLoadedMetadata will act as fallback
+  }
+  return null;
+}
+
+const themeSongMap = new Map();
+if (fs.existsSync(themeSongsDir)) {
+  for (const entry of fs.readdirSync(themeSongsDir, { withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    if (!entry.name.toLowerCase().endsWith(".mp3")) continue;
+    const key = normalizeMatchKey(entry.name);
+    if (key) {
+      themeSongMap.set(key, path.join(themeSongsDir, entry.name));
+    }
+  }
+}
 
 function buildFallbackSummary(pages, lang) {
   for (const p of pages) {
@@ -84,6 +134,8 @@ function findCustomAudio(slug, titleZh) {
 const audioHashToPath = new Map();
 let totalCopiedImages = 0;
 let totalCopiedAudio = 0;
+let totalMatchedSongs = 0;
+const matchedSongLogs = [];
 
 const cinemaBooks = sourceBooks.map((book, index) => {
   const slug = book.slug;
@@ -131,6 +183,29 @@ const cinemaBooks = sourceBooks.map((book, index) => {
     musicSrc = audioHashToPath.get(hash);
   }
 
+  let themeSongSrc = undefined;
+  let themeSongDurationSec = undefined;
+  const songLookupKeys = [
+    normalizeMatchKey(book.title?.zh),
+    normalizeMatchKey(book.slug),
+    normalizeMatchKey(book.sourceName),
+  ].filter(Boolean);
+
+  for (const key of songLookupKeys) {
+    if (themeSongMap.has(key)) {
+      const srcSongFile = themeSongMap.get(key);
+      const dstSongFile = path.join(targetSongsDir, `${slug}.mp3`);
+      fs.copyFileSync(srcSongFile, dstSongFile);
+      themeSongSrc = `./books/_songs/${slug}.mp3`;
+      themeSongDurationSec = probeAudioDurationSec(srcSongFile);
+      totalMatchedSongs += 1;
+      matchedSongLogs.push(
+        `  - ${path.basename(srcSongFile)} -> ${slug} (${themeSongDurationSec ?? "unknown"}s)`,
+      );
+      break;
+    }
+  }
+
   const coverFileName = path.basename(book.coverImage || pages[0]?.image || "page-01.webp");
 
   const summary = {
@@ -157,6 +232,7 @@ const cinemaBooks = sourceBooks.map((book, index) => {
     summary,
     coverImage: `./books/${slug}/${coverFileName}`,
     musicSrc,
+    ...(themeSongSrc ? { themeSongSrc, themeSongDurationSec } : {}),
     pageCount: pages.length,
     pages,
   };
@@ -212,5 +288,8 @@ for (const { code, file } of aboutFiles) {
 fs.writeFileSync(targetAboutJson, JSON.stringify(aboutMap, null, 2) + "\n", "utf8");
 
 console.log(
-  `Imported ${cinemaBooks.length} trilingual books (${totalCopiedImages} images, ${totalCopiedAudio} unique audio), 3 About pages, and logo from ${sourceRoot}`,
+  `Imported ${cinemaBooks.length} trilingual books (${totalCopiedImages} images, ${totalCopiedAudio} unique BGM, ${totalMatchedSongs} theme songs), 3 About pages, and logo from ${sourceRoot}`,
 );
+if (matchedSongLogs.length > 0) {
+  console.log("Matched theme songs:\n" + matchedSongLogs.join("\n"));
+}

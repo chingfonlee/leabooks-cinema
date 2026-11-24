@@ -1,4 +1,4 @@
-import type { LanguageCode } from "../types";
+import type { CinemaBook, LanguageCode } from "../types";
 
 export interface SubtitleSegment {
   text: string;
@@ -25,6 +25,84 @@ export function computeSmartPageDurationSec(
   const charsPerSec = lang === "zh" ? 11 : 22;
   const estimated = Math.round(3 + compact.length / charsPerSec);
   return Math.max(5, Math.min(35, estimated));
+}
+
+/**
+ * Compute per-page autoplay durations (seconds) for an entire book.
+ * When a vocal theme song duration (> 20s) is provided:
+ * - Pages 1-2 (cover & title intro): fixed 5s each
+ * - Pages 3+: distribute remaining song duration proportionally by each page's
+ *   character weight (min weight 15) with a 5s floor per page so total matches
+ *   the song duration cleanly.
+ * Otherwise falls back to standard per-page smart pacing.
+ */
+export function computeBookPageDurationsSec(
+  book: CinemaBook,
+  lang: LanguageCode = "zh",
+  songDurationSec?: number | null,
+): number[] {
+  const totalPages = book.pages.length;
+  if (totalPages === 0) return [];
+
+  if (!songDurationSec || !Number.isFinite(songDurationSec) || songDurationSec <= 20) {
+    return book.pages.map((p, idx) =>
+      computeSmartPageDurationSec(p.text[lang], idx, lang),
+    );
+  }
+
+  const introCount = Math.min(2, totalPages);
+  const durations = new Array<number>(totalPages).fill(5);
+  const remainingCount = totalPages - introCount;
+  if (remainingCount <= 0) return durations;
+
+  const floorSec = 5;
+  const remainingTarget = Math.max(
+    songDurationSec - introCount * floorSec,
+    remainingCount * floorSec,
+  );
+
+  const weights = book.pages.slice(introCount).map((p) => {
+    const compact = (p.text[lang] ?? "").replace(/\s+/g, "").trim();
+    return Math.max(compact.length, 15);
+  });
+
+  const allocated = new Array<number>(remainingCount).fill(0);
+  const locked = new Array<boolean>(remainingCount).fill(false);
+  let budget = remainingTarget;
+
+  while (true) {
+    let freeWeight = 0;
+    for (let i = 0; i < remainingCount; i++) {
+      if (!locked[i]) freeWeight += weights[i];
+    }
+    if (freeWeight <= 0) break;
+
+    let newlyLocked = false;
+    for (let i = 0; i < remainingCount; i++) {
+      if (locked[i]) continue;
+      const share = (weights[i] / freeWeight) * budget;
+      if (share < floorSec) {
+        allocated[i] = floorSec;
+        locked[i] = true;
+        budget -= floorSec;
+        newlyLocked = true;
+      }
+    }
+    if (!newlyLocked) {
+      for (let i = 0; i < remainingCount; i++) {
+        if (!locked[i]) {
+          allocated[i] = (weights[i] / freeWeight) * budget;
+        }
+      }
+      break;
+    }
+  }
+
+  for (let i = 0; i < remainingCount; i++) {
+    durations[introCount + i] = Math.round(allocated[i] * 100) / 100;
+  }
+
+  return durations;
 }
 
 function splitLatinSentence(sentence: string, maxChars: number): string[] {

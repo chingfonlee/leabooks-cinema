@@ -1265,6 +1265,32 @@ body,
   border-color: transparent;
 }
 
+.reader-icon-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(20, 24, 32, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary);
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.reader-icon-pill-btn:hover {
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.36);
+}
+
+.reader-icon-pill-btn.active {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: transparent;
+  box-shadow: 0 0 14px rgba(243, 181, 82, 0.45);
+}
+
 .reader-graphic-pill {
   display: inline-flex;
   align-items: center;
@@ -1963,6 +1989,10 @@ body,
   .reader-pill-btn {
     padding: 8px 12px;
     font-size: 13px;
+  }
+  .reader-icon-pill-btn {
+    width: 36px;
+    height: 36px;
   }
   .reader-graphic-pill {
     height: 36px;

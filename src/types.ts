@@ -15,6 +15,8 @@ export interface CinemaBook {
   summary: Record<LanguageCode, string>;
   coverImage: string;
   musicSrc?: string;
+  themeSongSrc?: string;
+  themeSongDurationSec?: number | null;
   pageCount: number;
   pages: CinemaBookPage[];
 }

@@ -31,6 +31,8 @@ export interface UiStrings {
   startAutoplay: string;
   muted: string;
   music: string;
+  switchToThemeSong: string;
+  switchToBgm: string;
   manualIdleHint: (sec: number) => string;
   autoplayModalTitle: (sec: number) => string;
   selectAll: (count: number) => string;
@@ -91,6 +93,8 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
     startAutoplay: "開始自動播放",
     muted: "靜音",
     music: "音樂",
+    switchToThemeSong: "切換至主題曲",
+    switchToBgm: "切換回輕音樂",
     manualIdleHint: (s) => `手動翻頁中・${s} 秒後恢復自動播放`,
     autoplayModalTitle: (s) =>
       s === 0 ? "自動輪播設定（智慧依字數）" : `自動輪播設定（每頁 ${s} 秒）`,
@@ -151,6 +155,8 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
     startAutoplay: "Start Autoplay",
     muted: "Muted",
     music: "Music",
+    switchToThemeSong: "Switch to Theme Song",
+    switchToBgm: "Switch to BGM",
     manualIdleHint: (s) => `Manual mode · Autoplay resumes in ${s}s`,
     autoplayModalTitle: (s) =>
       s === 0 ? "Autoplay Playlist (Smart Pace)" : `Autoplay Playlist (${s}s / page)`,
@@ -212,6 +218,8 @@ export const UI_STRINGS: Record<LanguageCode, UiStrings> = {
     startAutoplay: "Spustit přehrávání",
     muted: "Ztlumeno",
     music: "Hudba",
+    switchToThemeSong: "Přepnout na píseň",
+    switchToBgm: "Přepnout na hudbu",
     manualIdleHint: (s) => `Ruční režim · Automaticky za ${s}s`,
     autoplayModalTitle: (s) =>
       s === 0 ? "Automatické přehrávání (Chytré tempo)" : `Automatické přehrávání (${s}s / strana)`,

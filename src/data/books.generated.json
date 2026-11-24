@@ -561,6 +561,8 @@
     },
     "coverImage": "./books/if-normals-story/page-01.webp",
     "musicSrc": "./books/_shared/music-ae2634f41821.mp3",
+    "themeSongSrc": "./books/_songs/if-normals-story.mp3",
+    "themeSongDurationSec": 178.68,
     "pageCount": 18,
     "pages": [
       {
@@ -743,6 +745,8 @@
     },
     "coverImage": "./books/the-people-i-love-the-songs-i-love/page-01.webp",
     "musicSrc": "./books/_shared/music-ae2634f41821.mp3",
+    "themeSongSrc": "./books/_songs/the-people-i-love-the-songs-i-love.mp3",
+    "themeSongDurationSec": 210.72,
     "pageCount": 18,
     "pages": [
       {
@@ -1107,6 +1111,8 @@
     },
     "coverImage": "./books/dear-xiao-yangtao/page-01.webp",
     "musicSrc": "./books/_shared/music-ae2634f41821.mp3",
+    "themeSongSrc": "./books/_songs/dear-xiao-yangtao.mp3",
+    "themeSongDurationSec": 259.96,
     "pageCount": 18,
     "pages": [
       {
@@ -1289,6 +1295,8 @@
     },
     "coverImage": "./books/leap-like-a-fish/page-01.webp",
     "musicSrc": "./books/_shared/music-ae2634f41821.mp3",
+    "themeSongSrc": "./books/_songs/leap-like-a-fish.mp3",
+    "themeSongDurationSec": 190.96,
     "pageCount": 18,
     "pages": [
       {
@@ -1471,6 +1479,8 @@
     },
     "coverImage": "./books/the-place-i-want-to-go-back-to-isnt-called-home/page-01.webp",
     "musicSrc": "./books/_shared/music-ae2634f41821.mp3",
+    "themeSongSrc": "./books/_songs/the-place-i-want-to-go-back-to-isnt-called-home.mp3",
+    "themeSongDurationSec": 248.08,
     "pageCount": 18,
     "pages": [
       {
