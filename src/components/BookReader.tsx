@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
+  Home,
   Pause,
   Play,
   SkipForward,
@@ -11,6 +12,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { LANGUAGE_SHORT, UI_STRINGS } from "../i18n";
+import { isNativeAndroid } from "../plugins/localVideoLibrary";
 import type {
   AppSettings,
   CinemaBook,
@@ -360,10 +362,11 @@ export function BookReader({
   const currentScale: SubtitleScale = settings.subtitleScale ?? "md";
   const isMuted = settings.musicMuted || settings.musicVolume <= 0;
   const effectiveVolume = isMuted ? 0 : settings.musicVolume;
+  const nativeAndroid = isNativeAndroid();
 
   return (
     <div
-      className={`reader-root ${controlsVisible ? "controls-visible" : ""}`}
+      className={`reader-root ${controlsVisible ? "controls-visible" : ""} ${nativeAndroid ? "native-apk-reader" : ""}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onClick={() => {
@@ -575,15 +578,30 @@ export function BookReader({
         </div>
       )}
 
-      {/* Subtle mobile-only bottom edge page-turn arrows */}
+      {/* Subtle bottom edge quick-nav bar (Mobile Web + Android APK only) */}
       <div
         className="mobile-reader-nav-hint"
         onClick={(e) => e.stopPropagation()}
       >
         <button
+          type="button"
+          className="mobile-nav-arrow-btn mobile-nav-home-btn"
+          aria-label={strings.backToShelf}
+          onClick={(e) => {
+            e.stopPropagation();
+            onExit();
+          }}
+        >
+          <Home size={18} />
+        </button>
+        <button
+          type="button"
           className="mobile-nav-arrow-btn"
           aria-label="Previous page"
-          onClick={goToPrevPage}
+          onClick={(e) => {
+            e.stopPropagation();
+            goToPrevPage();
+          }}
         >
           <ChevronLeft size={18} />
         </button>
@@ -591,11 +609,26 @@ export function BookReader({
           {pageIdx + 1} / {currentBook.pages.length}
         </span>
         <button
+          type="button"
           className="mobile-nav-arrow-btn"
           aria-label="Next page"
-          onClick={() => goToNextPage(false)}
+          onClick={(e) => {
+            e.stopPropagation();
+            goToNextPage(false);
+          }}
         >
           <ChevronRight size={18} />
+        </button>
+        <button
+          type="button"
+          className={`mobile-nav-arrow-btn mobile-nav-vol-btn ${isMuted ? "muted" : "active"}`}
+          aria-label={isMuted ? strings.muted : strings.music}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleMute();
+          }}
+        >
+          {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
         </button>
       </div>
 
