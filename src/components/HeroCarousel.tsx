@@ -123,9 +123,6 @@ export function HeroCarousel({
               {String(total).padStart(2, "0")}
             </span>
             <h1 className="hero-book-title">{currentBook.title[language]}</h1>
-            <span className="hero-page-badge">
-              {currentBook.pageCount} {strings.pagesUnit}
-            </span>
           </div>
           <p className="hero-book-summary">{currentBook.summary[language]}</p>
         </div>

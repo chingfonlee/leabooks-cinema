@@ -60,7 +60,7 @@ export interface AppSettings {
 export const DEFAULT_SETTINGS: AppSettings = {
   language: "zh",
   pageDurationSec: 15,
-  idleResumeSec: 60,
+  idleResumeSec: 30,
   musicVolume: 0.7,
   musicMuted: false,
 };

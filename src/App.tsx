@@ -21,7 +21,7 @@ import {
   type YouTubeVideoItem,
 } from "./types";
 
-const SETTINGS_STORAGE_KEY = "leabooks-cinema-settings-v1";
+const SETTINGS_STORAGE_KEY = "leabooks-cinema-settings-v2";
 
 function loadSettings(): AppSettings {
   try {
