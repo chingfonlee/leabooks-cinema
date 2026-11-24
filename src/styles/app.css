@@ -1166,15 +1166,20 @@ body,
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.12);
+  top: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
   z-index: 30;
+  pointer-events: none;
 }
 
 .autoplay-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-strong) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(243, 181, 82, 0.42) 0%,
+    rgba(255, 202, 114, 0.52) 100%
+  );
   transition: width 0.1s linear;
 }
 
