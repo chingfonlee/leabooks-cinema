@@ -115,7 +115,7 @@ export function BookReader({
     if (controlsTimerRef.current) window.clearTimeout(controlsTimerRef.current);
     controlsTimerRef.current = window.setTimeout(() => {
       setControlsVisible(false);
-    }, 4500);
+    }, 3000);
   }, []);
 
   useEffect(() => {
@@ -353,7 +353,14 @@ export function BookReader({
       onTouchEnd={handleTouchEnd}
       onClick={() => {
         noteUserInteraction(false);
-        showControlsTemporarily();
+        if (controlsVisible) {
+          if (controlsTimerRef.current) {
+            window.clearTimeout(controlsTimerRef.current);
+          }
+          setControlsVisible(false);
+        } else {
+          showControlsTemporarily();
+        }
       }}
     >
       {currentBook.musicSrc && (
