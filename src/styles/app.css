@@ -171,7 +171,9 @@ body,
   gap: 14px;
   padding: 16px 32px;
   border-bottom: 1px solid rgba(186, 212, 255, 0.14);
-  background: rgba(9, 15, 32, 0.72);
+  background: rgba(9, 15, 32, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   flex-shrink: 0;
   z-index: 10;
 }
@@ -383,9 +385,11 @@ body,
   gap: 18px;
   padding: 14px 20px;
   border-radius: 20px;
-  background: rgba(12, 20, 42, 0.78);
+  background: rgba(12, 20, 42, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(186, 212, 255, 0.18);
-  box-shadow: 0 14px 36px rgba(4, 8, 20, 0.55);
+  box-shadow: 0 14px 36px rgba(4, 8, 20, 0.5);
 }
 
 .hero-nav-circle {
