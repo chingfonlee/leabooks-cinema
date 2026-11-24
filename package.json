@@ -1,0 +1,33 @@
+{
+  "name": "leabooks-cinema",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "import:content": "node scripts/import-content.mjs",
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "cap:sync": "npx cap sync android",
+    "build:apk": "npm run build && npx cap sync android && powershell -ExecutionPolicy Bypass -File scripts/build-apk.ps1"
+  },
+  "dependencies": {
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-legacy": "^6.1.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "terser": "^5.37.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
+  }
+}
