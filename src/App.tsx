@@ -203,7 +203,24 @@ export function App() {
         settings={settings}
         onLanguageChange={handleLanguageChange}
         onToggleMute={() =>
-          updateSettings({ ...settings, musicMuted: !settings.musicMuted })
+          updateSettings({
+            ...settings,
+            musicMuted: !settings.musicMuted,
+            musicVolume:
+              settings.musicMuted && settings.musicVolume === 0
+                ? 0.25
+                : settings.musicVolume,
+          })
+        }
+        onVolumeChange={(volume) =>
+          updateSettings({
+            ...settings,
+            musicVolume: volume,
+            musicMuted: volume === 0,
+          })
+        }
+        onSubtitleScaleChange={(subtitleScale) =>
+          updateSettings({ ...settings, subtitleScale })
         }
         onExit={() => setView({ mode: "shelf" })}
       />

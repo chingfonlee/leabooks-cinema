@@ -6,11 +6,17 @@ import {
   Pause,
   Play,
   SkipForward,
+  Volume1,
   Volume2,
   VolumeX,
 } from "lucide-react";
 import { LANGUAGE_SHORT, UI_STRINGS } from "../i18n";
-import type { AppSettings, CinemaBook, LanguageCode } from "../types";
+import type {
+  AppSettings,
+  CinemaBook,
+  LanguageCode,
+  SubtitleScale,
+} from "../types";
 import {
   buildSubtitleSegments,
   computeSmartPageDurationSec,
@@ -25,10 +31,14 @@ interface BookReaderProps {
   settings: AppSettings;
   onLanguageChange: (lang: LanguageCode) => void;
   onToggleMute: () => void;
+  onVolumeChange: (volume: number) => void;
+  onSubtitleScaleChange: (scale: SubtitleScale) => void;
   onExit: () => void;
 }
 
 const LANGS: LanguageCode[] = ["zh", "en", "cs"];
+const SUBTITLE_SCALES: SubtitleScale[] = ["sm", "md", "lg"];
+const VOLUME_STEPS = [0.25, 0.5, 0.75, 1] as const;
 
 export function BookReader({
   playlist,
@@ -37,6 +47,8 @@ export function BookReader({
   settings,
   onLanguageChange,
   onToggleMute,
+  onVolumeChange,
+  onSubtitleScaleChange,
   onExit,
 }: BookReaderProps) {
   const [bookIdx, setBookIdx] = useState(initialBookIndex);
@@ -345,6 +357,9 @@ export function BookReader({
   const progressPercent = isAutoPlaying
     ? Math.min(100, (elapsedMs / pageDurationMs) * 100)
     : 0;
+  const currentScale: SubtitleScale = settings.subtitleScale ?? "md";
+  const isMuted = settings.musicMuted || settings.musicVolume <= 0;
+  const effectiveVolume = isMuted ? 0 : settings.musicVolume;
 
   return (
     <div
@@ -423,17 +438,77 @@ export function BookReader({
               ? strings.autoplaying(currentPageDurationSec)
               : strings.startAutoplay}
           </button>
-          <button
-            className="reader-pill-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleMute();
-              showControlsTemporarily();
-            }}
+
+          {/* Graphical font-size control: 3 stepped A buttons */}
+          <div
+            className="reader-graphic-pill reader-font-pill"
+            role="group"
+            aria-label="Subtitle font size"
           >
-            {settings.musicMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-            {settings.musicMuted ? strings.muted : strings.music}
-          </button>
+            {SUBTITLE_SCALES.map((scale) => (
+              <button
+                key={scale}
+                type="button"
+                className={`reader-font-btn size-${scale} ${currentScale === scale ? "active" : ""}`}
+                aria-label={`Font size ${scale}`}
+                aria-pressed={currentScale === scale}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSubtitleScaleChange(scale);
+                  showControlsTemporarily();
+                }}
+              >
+                A
+              </button>
+            ))}
+          </div>
+
+          {/* Graphical volume control: speaker toggle + 4 ascending level bars */}
+          <div
+            className="reader-graphic-pill reader-volume-pill"
+            role="group"
+            aria-label={strings.music}
+          >
+            <button
+              type="button"
+              className={`reader-vol-icon-btn ${isMuted ? "muted" : ""}`}
+              aria-label={isMuted ? strings.muted : strings.music}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleMute();
+                showControlsTemporarily();
+              }}
+            >
+              {isMuted ? (
+                <VolumeX size={18} />
+              ) : effectiveVolume <= 0.5 ? (
+                <Volume1 size={18} />
+              ) : (
+                <Volume2 size={18} />
+              )}
+            </button>
+            <div className="reader-vol-bars">
+              {VOLUME_STEPS.map((step, idx) => {
+                const lit = !isMuted && effectiveVolume >= step - 0.01;
+                return (
+                  <button
+                    key={step}
+                    type="button"
+                    className={`reader-vol-bar-btn ${lit ? "lit" : ""}`}
+                    aria-label={`${strings.music} ${Math.round(step * 100)}%`}
+                    aria-pressed={lit}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onVolumeChange(step);
+                      showControlsTemporarily();
+                    }}
+                  >
+                    <span className={`reader-vol-bar bar-${idx + 1}`} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -483,7 +558,7 @@ export function BookReader({
         <div className="cinema-subtitle-wrap" onClick={handleSubtitleTap}>
           <p
             key={`${currentBook.slug}-${currentPage.page}-${activeSegIdx}-${lang}`}
-            className={`cinema-subtitle-text ${lang !== "zh" ? "latin" : ""}`}
+            className={`cinema-subtitle-text ${lang !== "zh" ? "latin" : ""} subtitle-scale-${currentScale}`}
           >
             {currentSubtitle}
           </p>

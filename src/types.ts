@@ -1,4 +1,5 @@
 export type LanguageCode = "zh" | "en" | "cs";
+export type SubtitleScale = "sm" | "md" | "lg";
 
 export interface CinemaBookPage {
   page: number;
@@ -55,6 +56,7 @@ export interface AppSettings {
   idleResumeSec: number; // default 30 (0 = disabled)
   musicVolume: number; // 0..1
   musicMuted: boolean;
+  subtitleScale: SubtitleScale;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -63,4 +65,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
   idleResumeSec: 30,
   musicVolume: 0.25,
   musicMuted: false,
+  subtitleScale: "md",
 };
