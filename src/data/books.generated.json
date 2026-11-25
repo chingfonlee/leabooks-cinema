@@ -929,6 +929,8 @@
     },
     "coverImage": "./books/bouncing-jumping-me/page-01.webp",
     "musicSrc": "./books/_shared/music-ae2634f41821.mp3",
+    "themeSongSrc": "./books/_songs/bouncing-jumping-me.mp3",
+    "themeSongDurationSec": 162.96,
     "pageCount": 18,
     "pages": [
       {
