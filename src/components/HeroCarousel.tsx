@@ -99,7 +99,6 @@ export function HeroCarousel({
           aria-label={`${strings.btnStartReading} ${currentBook.title[language]}`}
         >
           <img
-            key={currentBook.slug}
             className="hero-cover-full-img"
             src={currentBook.coverImage}
             alt={currentBook.title[language]}

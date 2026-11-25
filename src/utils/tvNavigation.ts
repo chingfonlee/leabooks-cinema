@@ -1,8 +1,8 @@
 import { useEffect, type RefObject } from "react";
 
 const FOCUSABLE_SELECTOR = [
-  "button:not([disabled])",
-  "input:not([disabled])",
+  "button:not([disabled]):not([tabindex='-1'])",
+  "input:not([disabled]):not([tabindex='-1'])",
   "[tabindex='0']",
 ].join(", ");
 
@@ -13,11 +13,22 @@ export function getFocusableElements(container: HTMLElement): HTMLElement[] {
     container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
   );
   return nodes.filter((el) => {
+    if (el.getAttribute("tabindex") === "-1") return false;
     const style = window.getComputedStyle(el);
     if (style.display === "none" || style.visibility === "hidden") return false;
     const rect = el.getBoundingClientRect();
     return rect.width > 0 && rect.height > 0;
   });
+}
+
+function isHorizontallyClippedInScrollContainer(
+  el: HTMLElement,
+  rect: DOMRect,
+): boolean {
+  const scrollParent = el.closest<HTMLElement>(".bookshelf-scroll");
+  if (!scrollParent) return false;
+  const sRect = scrollParent.getBoundingClientRect();
+  return rect.right <= sRect.left + 8 || rect.left >= sRect.right - 8;
 }
 
 export function findNextFocusable(
@@ -34,6 +45,7 @@ export function findNextFocusable(
   const curRect = current.getBoundingClientRect();
   const curCx = curRect.left + curRect.width / 2;
   const curCy = curRect.top + curRect.height / 2;
+  const isHorizontal = direction === "left" || direction === "right";
 
   let best: HTMLElement | null = null;
   let bestScore = Number.POSITIVE_INFINITY;
@@ -44,34 +56,81 @@ export function findNextFocusable(
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
 
-    const dx = cx - curCx;
-    const dy = cy - curCy;
+    if (isHorizontal) {
+      // Strictly stay within the same horizontal band so reaching the left/right
+      // edge of a row never jumps diagonally to header/dock/another row.
+      const overlapY =
+        Math.min(curRect.bottom, rect.bottom) - Math.max(curRect.top, rect.top);
+      const maxH = Math.max(curRect.height, rect.height);
+      const isSameRow =
+        overlapY > 4 || Math.abs(cy - curCy) <= Math.max(24, maxH * 0.5);
+      if (!isSameRow) continue;
 
-    let primary = 0;
-    let secondary = 0;
+      if (direction === "right") {
+        if (rect.left < curRect.right - 8 && cx <= curCx + 8) continue;
+        const edgeDistX = Math.max(0, rect.left - curRect.right);
+        const score = edgeDistX + Math.abs(cy - curCy) * 2.5;
+        if (score < bestScore) {
+          bestScore = score;
+          best = el;
+        }
+      } else {
+        if (rect.right > curRect.left + 8 && cx >= curCx - 8) continue;
+        const edgeDistX = Math.max(0, curRect.left - rect.right);
+        const score = edgeDistX + Math.abs(cy - curCy) * 2.5;
+        if (score < bestScore) {
+          bestScore = score;
+          best = el;
+        }
+      }
+    } else {
+      // For vertical movement, skip cards scrolled completely outside the visible
+      // horizontal viewport of the bookshelf so focus lands on a visible card.
+      if (isHorizontallyClippedInScrollContainer(el, rect)) continue;
 
-    if (direction === "right") {
-      if (dx <= 4) continue;
-      primary = dx;
-      secondary = Math.abs(dy);
-    } else if (direction === "left") {
-      if (dx >= -4) continue;
-      primary = -dx;
-      secondary = Math.abs(dy);
-    } else if (direction === "down") {
-      if (dy <= 4) continue;
-      primary = dy;
-      secondary = Math.abs(dx);
-    } else if (direction === "up") {
-      if (dy >= -4) continue;
-      primary = -dy;
-      secondary = Math.abs(dx);
-    }
-
-    const score = primary + secondary * 2.6;
-    if (score < bestScore) {
-      bestScore = score;
-      best = el;
+      if (direction === "down") {
+        if (rect.top < curRect.bottom - 8 && cy <= curCy + Math.max(12, curRect.height * 0.35)) {
+          continue;
+        }
+        const edgeDistY = Math.max(0, rect.top - curRect.bottom);
+        const overlapX =
+          Math.min(curRect.right, rect.right) - Math.max(curRect.left, rect.left);
+        const edgeDistX =
+          overlapX > 0
+            ? 0
+            : rect.left > curRect.right
+              ? rect.left - curRect.right
+              : curRect.left - rect.right;
+        const score =
+          edgeDistY * 2.4 +
+          edgeDistX * 1.6 +
+          Math.abs(cx - curCx) * (overlapX > 0 ? 0.15 : 0.35);
+        if (score < bestScore) {
+          bestScore = score;
+          best = el;
+        }
+      } else {
+        if (rect.bottom > curRect.top + 8 && cy >= curCy - Math.max(12, curRect.height * 0.35)) {
+          continue;
+        }
+        const edgeDistY = Math.max(0, curRect.top - rect.bottom);
+        const overlapX =
+          Math.min(curRect.right, rect.right) - Math.max(curRect.left, rect.left);
+        const edgeDistX =
+          overlapX > 0
+            ? 0
+            : rect.left > curRect.right
+              ? rect.left - curRect.right
+              : curRect.left - rect.right;
+        const score =
+          edgeDistY * 2.4 +
+          edgeDistX * 1.6 +
+          Math.abs(cx - curCx) * (overlapX > 0 ? 0.15 : 0.35);
+        if (score < bestScore) {
+          bestScore = score;
+          best = el;
+        }
+      }
     }
   }
 
@@ -80,8 +139,20 @@ export function findNextFocusable(
 
 export function focusElementForTv(el: HTMLElement | null): void {
   if (!el) return;
-  el.focus({ preventScroll: true });
-  el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+  try {
+    el.focus({ preventScroll: true });
+  } catch {
+    el.focus();
+  }
+  // BookshelfView manages its own horizontal scroll container for .bookshelf-card
+  if (el.classList.contains("bookshelf-card")) return;
+  if (typeof el.scrollIntoView === "function") {
+    try {
+      el.scrollIntoView({ block: "nearest", inline: "nearest" });
+    } catch {
+      el.scrollIntoView(false);
+    }
+  }
 }
 
 export function useSpatialNavigation(
@@ -144,6 +215,24 @@ export function useSpatialNavigation(
         active.type === "range" &&
         (dir === "left" || dir === "right")
       ) {
+        if (!e.isTrusted) {
+          e.preventDefault();
+          const min = Number(active.min || 0);
+          const max = Number(active.max || 100);
+          const step = Number(active.step || 5);
+          const cur = Number(active.value || 0);
+          const nextVal = Math.min(
+            max,
+            Math.max(min, cur + (dir === "right" ? step : -step)),
+          );
+          const setter = Object.getOwnPropertyDescriptor(
+            HTMLInputElement.prototype,
+            "value",
+          )?.set;
+          setter?.call(active, String(nextVal));
+          active.dispatchEvent(new Event("input", { bubbles: true }));
+          active.dispatchEvent(new Event("change", { bubbles: true }));
+        }
         return;
       }
 

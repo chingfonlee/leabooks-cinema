@@ -51,7 +51,8 @@ export function BookshelfView({
     }
 
     if (targetLeft !== null) {
-      if (typeof container.scrollTo === "function") {
+      const isTvRemote = document.body.classList.contains("tv-remote-mode");
+      if (!isTvRemote && typeof container.scrollTo === "function") {
         try {
           container.scrollTo({ left: targetLeft, behavior: "smooth" });
         } catch {

@@ -65,8 +65,14 @@ body.tv-remote-mode input:focus {
   box-shadow:
     0 0 0 8px rgba(243, 181, 82, 0.28),
     0 12px 32px rgba(0, 0, 0, 0.55);
-  position: relative;
   z-index: 6;
+}
+
+body.tv-remote-mode .bookshelf-card:focus {
+  outline-offset: -4px;
+  box-shadow:
+    0 0 0 2px var(--accent-strong),
+    0 12px 28px rgba(0, 0, 0, 0.55);
 }
 
 /* ==================== GLOBAL STARRY NIGHT BACKDROP ==================== */
@@ -670,7 +676,10 @@ body,
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+}
+
+.hero-dock-actions > * + * {
+  margin-left: 10px;
 }
 
 .hero-cta-btn {
@@ -769,6 +778,7 @@ body,
   grid-template-rows: repeat(2, auto);
   grid-gap: 18px 20px;
   gap: 18px 20px;
+  width: -webkit-max-content;
   width: max-content;
   margin: 0 auto;
   padding: 4px 6px;
@@ -807,8 +817,7 @@ body,
 }
 
 .bookshelf-card {
-  display: flex;
-  flex-direction: column;
+  display: block;
   width: 100%;
   padding: 0;
   border-radius: 14px;
@@ -842,9 +851,9 @@ body,
 
 .bookshelf-cover-box {
   position: relative;
+  display: block;
   width: 100%;
-  height: 0;
-  padding-top: 48.56%;
+  height: calc(var(--bookshelf-card-w, 500px) * 0.4856);
   background: #0a0f1f;
   overflow: hidden;
 }
@@ -882,7 +891,8 @@ body,
 }
 
 .about-article-card {
-  width: min(820px, 100%);
+  width: 100%;
+  max-width: 820px;
   padding: 40px 44px;
   border-radius: 24px;
   background: rgba(21, 26, 35, 0.88);
@@ -945,6 +955,7 @@ body,
 .book-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-gap: 22px;
   gap: 22px;
 }
 
@@ -961,24 +972,35 @@ body,
 }
 
 .book-card {
-  display: flex;
-  flex-direction: column;
+  display: block;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
-.book-cover-btn {
+.book-cover-box {
   position: relative;
   display: block;
   width: 100%;
   height: 0;
   padding-top: 56.25%;
-  padding-left: 0;
-  padding-right: 0;
-  padding-bottom: 0;
+  box-sizing: content-box;
   background: #0b0e13;
+  overflow: hidden;
+}
+
+.book-cover-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: transparent;
   overflow: hidden;
 }
 
@@ -1714,7 +1736,8 @@ body,
 }
 
 .modal-panel {
-  width: min(920px, 94vw);
+  width: 94vw;
+  max-width: 920px;
   max-height: 88vh;
   display: flex;
   flex-direction: column;
@@ -1758,6 +1781,7 @@ body,
 .playlist-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-gap: 12px;
   gap: 12px;
 }
 
@@ -1835,9 +1859,100 @@ body,
   border-color: transparent;
 }
 
+/* ==================== COMPACT LANDSCAPE TV (e.g. 1080p TV @ 2x = 960x540dp) ==================== */
+
+@media (orientation: landscape) and (max-width: 1180px),
+  (orientation: landscape) and (max-height: 620px) {
+  .shelf-header {
+    padding: 8px 18px;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+  .brand-logo {
+    width: 34px;
+    height: 34px;
+  }
+  .brand-title {
+    font-size: 19px;
+  }
+  .brand-badge {
+    display: none;
+  }
+  .tab-btn {
+    padding: 7px 14px;
+    font-size: 14px;
+  }
+  .nav-about-link {
+    margin-left: 8px;
+    padding: 6px 4px;
+    font-size: 14px;
+  }
+  .lang-pill {
+    padding: 5px 9px;
+    font-size: 12px;
+  }
+  .action-btn {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+  .shelf-content.carousel-mode {
+    padding: 8px 18px 8px;
+  }
+  .hero-carousel-wrap {
+    gap: 8px;
+  }
+  .hero-bottom-dock {
+    min-height: 78px;
+    padding: 8px 14px;
+    border-radius: 16px;
+    flex-wrap: nowrap;
+  }
+  .hero-nav-circle {
+    width: 40px;
+    height: 40px;
+  }
+  .hero-dock-meta {
+    margin: 0 12px;
+    gap: 2px;
+  }
+  .hero-book-title {
+    font-size: 18px;
+  }
+  .hero-order-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    margin-left: 8px;
+  }
+  .hero-book-summary {
+    font-size: 13px;
+    line-height: 1.38;
+    height: 2.76em;
+    -webkit-line-clamp: 2;
+  }
+  .hero-dock-actions > * + * {
+    margin-left: 8px;
+  }
+  .hero-cta-btn {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+  .hero-mute-btn {
+    width: 38px;
+    height: 38px;
+  }
+  .bookshelf-scroll {
+    padding: 6px 6px 8px;
+  }
+  .bookshelf-grid {
+    --bookshelf-card-w: 276px;
+    grid-gap: 12px 14px;
+    gap: 12px 14px;
+  }
+}
+
 /* ==================== MOBILE PORTRAIT RESPONSIVE ==================== */
 
-@media (max-width: 960px) {
+@media (max-width: 767px), (max-width: 960px) and (orientation: portrait) {
   .shelf-header {
     padding: 10px 12px;
     gap: 8px;

@@ -1,5 +1,6 @@
 package com.leabook.cinema;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.WindowManager;
@@ -39,8 +40,34 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        int keyCode = event.getKeyCode();
+
+        // Intercept D-Pad arrows natively and forward directly to JS so Android WebView's
+        // built-in spatial navigation / ViewRootImpl focusSearch never fights with JS focus.
+        String arrowKey = null;
+        if (keyCode == KeyEvent.KEYCODE_DPAD_UP) arrowKey = "ArrowUp";
+        else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) arrowKey = "ArrowDown";
+        else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) arrowKey = "ArrowLeft";
+        else if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) arrowKey = "ArrowRight";
+
+        if (arrowKey != null) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                WebView webView = getBridge() != null ? getBridge().getWebView() : null;
+                if (webView != null) {
+                    final String js =
+                        "window.dispatchEvent(new KeyboardEvent('keydown', {key:'"
+                        + arrowKey
+                        + "',code:'"
+                        + arrowKey
+                        + "',bubbles:true,cancelable:true}));";
+                    webView.evaluateJavascript(js, null);
+                }
+            }
+            return true;
+        }
+
         // Normalize Android TV / whiteboard remote OK (DPAD_CENTER) to ENTER for WebView
-        if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             KeyEvent mapped = new KeyEvent(
                 event.getDownTime(),
                 event.getEventTime(),
@@ -63,6 +90,9 @@ public class MainActivity extends BridgeActivity {
             WebView webView = getBridge().getWebView();
             webView.setFocusable(true);
             webView.setFocusableInTouchMode(true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                webView.setDefaultFocusHighlightEnabled(false);
+            }
             webView.requestFocus();
         }
     }

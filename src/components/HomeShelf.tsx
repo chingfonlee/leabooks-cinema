@@ -254,28 +254,30 @@ export function HomeShelf({
               <div className="book-grid">
                 {videos.map((video, idx) => (
                   <article key={video.id} className="book-card">
-                    <button
-                      className="book-cover-btn"
-                      onClick={() => onPlayLocalVideo(idx)}
-                      aria-label={video.displayTitle}
-                    >
-                      {video.coverImage ? (
-                        <img
-                          className="book-cover-img"
-                          src={video.coverImage}
-                          alt={video.displayTitle}
-                        />
-                      ) : (
-                        <div className="video-placeholder-cover">
-                          <Film size={52} />
+                    <div className="book-cover-box">
+                      <button
+                        className="book-cover-btn"
+                        onClick={() => onPlayLocalVideo(idx)}
+                        aria-label={video.displayTitle}
+                      >
+                        {video.coverImage ? (
+                          <img
+                            className="book-cover-img"
+                            src={video.coverImage}
+                            alt={video.displayTitle}
+                          />
+                        ) : (
+                          <div className="video-placeholder-cover">
+                            <Film size={52} />
+                          </div>
+                        )}
+                        <div className="video-play-overlay">
+                          <div className="video-play-circle">
+                            <Play size={28} fill="#fff" />
+                          </div>
                         </div>
-                      )}
-                      <div className="video-play-overlay">
-                        <div className="video-play-circle">
-                          <Play size={28} fill="#fff" />
-                        </div>
-                      </div>
-                    </button>
+                      </button>
+                    </div>
                     <div className="book-card-footer">
                       <span className="book-card-title">{video.displayTitle}</span>
                     </div>
@@ -298,28 +300,30 @@ export function HomeShelf({
               <div className="book-grid">
                 {YOUTUBE_VIDEOS.map((yt) => (
                   <article key={yt.id} className="book-card">
-                    <button
-                      className="book-cover-btn"
-                      onClick={() => onPlayYouTubeVideo(yt)}
-                      aria-label={yt.title[language]}
-                    >
-                      {yt.coverImage ? (
-                        <img
-                          className="book-cover-img"
-                          src={yt.coverImage}
-                          alt={yt.title[language]}
-                        />
-                      ) : (
-                        <div className="video-placeholder-cover">
-                          <Film size={52} />
+                    <div className="book-cover-box">
+                      <button
+                        className="book-cover-btn"
+                        onClick={() => onPlayYouTubeVideo(yt)}
+                        aria-label={yt.title[language]}
+                      >
+                        {yt.coverImage ? (
+                          <img
+                            className="book-cover-img"
+                            src={yt.coverImage}
+                            alt={yt.title[language]}
+                          />
+                        ) : (
+                          <div className="video-placeholder-cover">
+                            <Film size={52} />
+                          </div>
+                        )}
+                        <div className="video-play-overlay">
+                          <div className="video-play-circle">
+                            <Play size={28} fill="#fff" />
+                          </div>
                         </div>
-                      )}
-                      <div className="video-play-overlay">
-                        <div className="video-play-circle">
-                          <Play size={28} fill="#fff" />
-                        </div>
-                      </div>
-                    </button>
+                      </button>
+                    </div>
                     <div className="book-card-footer">
                       <span className="book-card-title">{yt.title[language]}</span>
                     </div>

@@ -87,8 +87,14 @@ export function App() {
 
   // Toggle TV remote focus ring visibility automatically between touch and D-Pad
   useEffect(() => {
-    const onPointerOrTouch = () => {
+    const onTouchStart = () => {
       document.body.classList.remove("tv-remote-mode");
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      // Ignore synthetic/keyboard-emulated pointer events (which some Android TVs emit on OK/Enter)
+      if (e.pointerType === "touch" || (e.pointerType === "mouse" && e.buttons > 0)) {
+        document.body.classList.remove("tv-remote-mode");
+      }
     };
     const onKeyDown = (e: KeyboardEvent) => {
       if (
@@ -100,12 +106,12 @@ export function App() {
         document.body.classList.add("tv-remote-mode");
       }
     };
-    window.addEventListener("touchstart", onPointerOrTouch, { passive: true });
-    window.addEventListener("pointerdown", onPointerOrTouch, { passive: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("pointerdown", onPointerDown, { passive: true });
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      window.removeEventListener("touchstart", onPointerOrTouch);
-      window.removeEventListener("pointerdown", onPointerOrTouch);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, []);
